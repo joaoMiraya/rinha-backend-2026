@@ -20,9 +20,11 @@ services:
       - rinha-net
 
   api1:
+    pull_policy: never
     build:
       context: https://github.com/joaoMiraya/rinha-backend-2026.git#main
       dockerfile: Dockerfile
+      network: host
     image: rinha-backend-2026-api:latest
     container_name: rinha-api-1
     environment:
@@ -56,9 +58,11 @@ services:
       - rinha-net
 
   api2:
+    pull_policy: never
     build:
       context: https://github.com/joaoMiraya/rinha-backend-2026.git#main
       dockerfile: Dockerfile
+      network: host
     image: rinha-backend-2026-api:latest
     container_name: rinha-api-2
     environment:
