@@ -1,0 +1,116 @@
+services:
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: rinha-nginx
+    depends_on:
+      api1:
+        condition: service_started
+      api2:
+        condition: service_started
+    ports:
+      - "9999:9999"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "0.05"
+          memory: "10MB"
+    networks:
+      - rinha-net
+
+  api1:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    image: rinha-backend-2026-api:latest
+    container_name: rinha-api-1
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "3000"
+      QDRANT_URL: "http://qdrant:6333"
+      QDRANT_COLLECTION: "fraud_vectors"
+      NORMALIZATION_FILE: "/app/resources/normalization.json"
+      MCC_RISK_FILE: "/app/resources/mcc_risk.json"
+      REFERENCES_FILE: "/app/resources/references.json.gz"
+      READINESS_REQUIRE_POINTS: "true"
+      READY_MIN_POINTS: "3000000"
+      INGEST_ON_STARTUP: "true"
+      INGEST_BATCH_SIZE: "16"
+      INGEST_WAIT: "true"
+      FORCE_REINGEST: "false"
+      STARTUP_TIMEOUT_SECS: "1800"
+      REQUEST_TIMEOUT_MS: "3000"
+      HEALTH_POLL_INTERVAL_MS: "2000"
+    depends_on:
+      qdrant:
+        condition: service_started
+    volumes:
+      - ./resources:/app/resources:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "0.13"
+          memory: "12MB"
+    networks:
+      - rinha-net
+
+  api2:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    image: rinha-backend-2026-api:latest
+    container_name: rinha-api-2
+    environment:
+      APP_HOST: "0.0.0.0"
+      APP_PORT: "3000"
+      QDRANT_URL: "http://qdrant:6333"
+      QDRANT_COLLECTION: "fraud_vectors"
+      NORMALIZATION_FILE: "/app/resources/normalization.json"
+      MCC_RISK_FILE: "/app/resources/mcc_risk.json"
+      REFERENCES_FILE: "/app/resources/references.json.gz"
+      READINESS_REQUIRE_POINTS: "true"
+      READY_MIN_POINTS: "3000000"
+      INGEST_ON_STARTUP: "false"
+      FORCE_REINGEST: "false"
+      STARTUP_TIMEOUT_SECS: "1800"
+      REQUEST_TIMEOUT_MS: "3000"
+      HEALTH_POLL_INTERVAL_MS: "2000"
+    depends_on:
+      qdrant:
+        condition: service_started
+      api1:
+        condition: service_started
+    volumes:
+      - ./resources:/app/resources:ro
+    deploy:
+      resources:
+        limits:
+          cpus: "0.13"
+          memory: "8MB"
+    networks:
+      - rinha-net
+
+  qdrant:
+    image: qdrant/qdrant:v1.13.2
+    container_name: rinha-qdrant
+    environment:
+      QDRANT__SERVICE__HTTP_PORT: 6333
+      QDRANT__STORAGE__HNSW_INDEX__MAX_INDEXING_THREADS: 1
+      QDRANT__STORAGE__OPTIMIZERS__MAX_OPTIMIZATION_THREADS: 1
+    volumes:
+      - qdrant-storage:/qdrant/storage
+    deploy:
+      resources:
+        limits:
+          cpus: "0.65"
+          memory: "320MB"
+    networks:
+      - rinha-net
+
+networks:
+  rinha-net:
+    driver: bridge
+
+volumes:
+  qdrant-storage:
