@@ -20,7 +20,7 @@ services:
       - rinha-net
 
   api1:
-    image: joaomiraya/rinha-backend-2026:${IMAGE_TAG:-1.0.3}
+    image: joaomiraya/rinha-backend-2026:${IMAGE_TAG:-1.0.4}
     container_name: rinha-api-1
     deploy:
       resources:
@@ -31,7 +31,7 @@ services:
       - rinha-net
 
   api2:
-    image: joaomiraya/rinha-backend-2026:${IMAGE_TAG:-1.0.3}
+    image: joaomiraya/rinha-backend-2026:${IMAGE_TAG:-1.0.4}
     container_name: rinha-api-2
     depends_on:
       api1:
