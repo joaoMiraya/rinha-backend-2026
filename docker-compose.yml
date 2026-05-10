@@ -20,7 +20,7 @@ services:
       - rinha-net
 
   api1:
-    image: joaomiraya/rinha-backend-2026:latest
+    image: joaomiraya/joaomiraya/rinha-backend-2026:1.0.2
     container_name: rinha-api-1
     environment:
       APP_HOST: "0.0.0.0"
@@ -53,7 +53,7 @@ services:
       - rinha-net
 
   api2:
-    image: joaomiraya/rinha-backend-2026:latest
+    image: joaomiraya/joaomiraya/rinha-backend-2026:1.0.2
     container_name: rinha-api-2
     environment:
       APP_HOST: "0.0.0.0"
