@@ -6,11 +6,16 @@ ENV CARGO_NET_RETRY=10 \
 
 COPY Cargo.toml Cargo.lock ./
 COPY src ./src
+COPY resources ./resources
 
-RUN cargo fetch --locked && cargo build --release --locked
+RUN cargo build --release --locked --bin build_index
+RUN REFERENCES_FILE=/app/resources/references.json.gz INDEX_FILE=/app/resources/index.bin \
+    ./target/release/build_index
+RUN cargo build --release --locked --bin api
 
 FROM debian:13-slim
 WORKDIR /app
 COPY --from=builder /app/target/release/api /usr/local/bin/api
+COPY --from=builder /app/resources /app/resources
 USER 65532:65532
 ENTRYPOINT ["/usr/local/bin/api"]

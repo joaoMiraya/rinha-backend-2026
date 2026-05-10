@@ -15,8 +15,6 @@ pub enum AppError {
     #[error(transparent)]
     Serde(#[from] serde_json::Error),
     #[error(transparent)]
-    Http(#[from] reqwest::Error),
-    #[error(transparent)]
     DateTime(#[from] chrono::ParseError),
     #[error(transparent)]
     Join(#[from] tokio::task::JoinError),
@@ -31,7 +29,6 @@ impl IntoResponse for AppError {
             AppError::DateTime(err) => (StatusCode::BAD_REQUEST, err.to_string()),
             AppError::Io(err) => (StatusCode::SERVICE_UNAVAILABLE, err.to_string()),
             AppError::Serde(err) => (StatusCode::SERVICE_UNAVAILABLE, err.to_string()),
-            AppError::Http(err) => (StatusCode::SERVICE_UNAVAILABLE, err.to_string()),
             AppError::Join(err) => (StatusCode::SERVICE_UNAVAILABLE, err.to_string()),
         };
         (status, message).into_response()
